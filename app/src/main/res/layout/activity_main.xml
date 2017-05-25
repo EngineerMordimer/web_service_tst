@@ -16,11 +16,15 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent">
 		<Button
-				android:text="Button"
+				android:text="test load App"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content" android:id="@+id/bt_test"/>
+		<Button
+				android:text="Connect"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content" android:layout_below="@+id/textView"
 				android:layout_alignEnd="@+id/textView" android:layout_marginTop="68dp"
-				android:id="@+id/button"/>
+				android:id="@+id/bt_connect"/>
 		<TextView
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
