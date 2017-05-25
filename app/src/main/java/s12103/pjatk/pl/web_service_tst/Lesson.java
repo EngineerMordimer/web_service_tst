@@ -1,75 +1,74 @@
 package s12103.pjatk.pl.web_service_tst;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by maciej.chmielinski on 13.05.2017.
  */
 
-public class Lesson {
-    private String building;
-    private Date beginDate;
-    private Date endDate;
-    private String code;
-    private String name;
-    private String classroom;
-    private String type;
-    private long id;
+public class Lesson implements Serializable {
 
-    public Lesson(String building, Date beginDate, Date endDate, String code, String name, String classroom, String type, long id) {
-        this.building = building;
-        this.beginDate = beginDate;
-        this.endDate = endDate;
-        this.code = code;
-        this.name = name;
-        this.classroom = classroom;
-        this.type = type;
-        this.id = id;
-    }
+	private static final long serialVersionUID = 2766184602676920851L;
 
-    public String getBuilding() {
-        return building;
-    }
+	private String building;
+	private Date beginDate;
+	private Date endDate;
+	private String code;
+	private String name;
+	private String classroom;
+	private String type;
+	private long id;
 
-    public Date getBeginDate() {
-        return beginDate;
-    }
+	public Lesson(String building, Date beginDate, Date endDate, String code, String name,
+			String classroom, String type, long id) {
+		this.building = building;
+		this.beginDate = beginDate;
+		this.endDate = endDate;
+		this.code = code;
+		this.name = name;
+		this.classroom = classroom;
+		this.type = type;
+		this.id = id;
+	}
 
-    public Date getEndDate() {
-        return endDate;
-    }
+	public String getBuilding() {
+		return building;
+	}
 
-    public String getCode() {
-        return code;
-    }
+	public Date getBeginDate() {
+		return beginDate;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public Date getEndDate() {
+		return endDate;
+	}
 
-    public String getClassroom() {
-        return classroom;
-    }
+	public String getCode() {
+		return code;
+	}
 
-    public String getType() {
-        return type;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public long getId() {
-        return id;
-    }
+	public String getClassroom() {
+		return classroom;
+	}
 
-    @Override
-    public String toString() {
-        return "Lesson{" +
-                "building='" + building + '\'' +
-                ", beginDate=" + beginDate +
-                ", endDate=" + endDate +
-                ", code='" + code + '\'' +
-                ", name='" + name + '\'' +
-                ", classroom='" + classroom + '\'' +
-                ", type='" + type + '\'' +
-                ", id=" + id +
-                '}';
-    }
+	public String getType() {
+		return type;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	@Override
+	public String toString() {
+		return "Lesson{" + "building='" + building + '\'' + ", beginDate=" + beginDate
+				+ ", endDate=" + endDate + ", code='" + code + '\'' + ", name='" + name + '\''
+				+ ", classroom='" + classroom + '\'' + ", type='" + type + '\'' + ", id=" + id
+				+ '}';
+	}
 }
