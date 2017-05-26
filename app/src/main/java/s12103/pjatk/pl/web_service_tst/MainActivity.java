@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.NTCredentials;
@@ -27,13 +30,15 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+	final Context context = this;
 	TextView textView;
-	Button bt_student_data, bt_test, bt_show;
+	Button bt_student_data, bt_test, bt_show, bt_go_calendar;
 
 	String username = "";
 	String password = "";
 
 	Person person;
+	ArrayList<Lesson> lessonList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 		bt_student_data = (Button) findViewById(R.id.bt_student_data);
 		bt_test = (Button) findViewById(R.id.bt_test);
 		bt_show = (Button) findViewById(R.id.bt_show);
+		bt_go_calendar = (Button) findViewById(R.id.bt_goCalendar);
 
 		textView.setText("START");
 		bt_student_data.setOnClickListener(new View.OnClickListener() {
@@ -59,6 +65,10 @@ public class MainActivity extends AppCompatActivity {
 			public void onClick(View view) {
 				AsyncCallTest task = new AsyncCallTest();
 				task.execute();
+				AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+				alertBuilder.setMessage("TEST - OK").setCancelable(true);
+				AlertDialog alertDialog = alertBuilder.create();
+				alertDialog.show();
 			}
 		});
 
@@ -68,12 +78,28 @@ public class MainActivity extends AppCompatActivity {
 				textView.setText(person.toString());
 			}
 		});
+
+		bt_go_calendar.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Intent intent = new Intent(MainActivity.this, CalendarViewActivity.class);
+				intent.putExtra("SCHEDULE", lessonList);
+				startActivity(intent);
+			}
+		});
 	}
 
 	public void test_connect() throws Exception {
-		HttpResponse response = getStudentSchedule(username, password, "2017-05-26", "2017-05-29");
+		HttpResponse response;
+
+		response = getStudentSchedule(username, password, "2017-05-26", "2017-05-29");
 		JSONArray jsonArray = new JSONArray(EntityUtils.toString(response.getEntity()));
-		ArrayList<Lesson> lessonList = getScheduleFromJson(jsonArray);
+		lessonList = getScheduleFromJson(jsonArray);
+		Log.i("TEST", "Status Code: " + response.getStatusLine().getStatusCode());
+
+		response = getStudentPersonalDataSimple(username, password);
+		JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
+		person = getPersonFromJson(jsonObject);
 		Log.i("TEST", "Status Code: " + response.getStatusLine().getStatusCode());
 	}
 
@@ -85,10 +111,10 @@ public class MainActivity extends AppCompatActivity {
 			try {
 				HttpResponse response = getStudentPersonalDataSimple(username, password);
 				JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
+				person = getPersonFromJson(jsonObject);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
 			return null;
 		}
 
@@ -141,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
 		ArrayList<Lesson> lessonList = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject lessonJSON = jsonArray.getJSONObject(i);
-			Log.i("ARRAY", lessonJSON.toString());
 			Lesson lesson = new Lesson(lessonJSON);
 			lessonList.add(lesson);
 		}
