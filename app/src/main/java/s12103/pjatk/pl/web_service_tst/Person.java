@@ -1,5 +1,8 @@
 package s12103.pjatk.pl.web_service_tst;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -19,6 +22,13 @@ public class Person implements Serializable {
 		this.surname = surname;
 		this.login = login;
 		this.balance = balance;
+	}
+
+	public Person(JSONObject jsonObject) throws JSONException {
+		this.name = jsonObject.getString("Imie");
+		this.surname = jsonObject.getString("Nazwisko");
+		this.login = jsonObject.getString("Login");
+		this.balance = jsonObject.getDouble("Saldo");
 	}
 
 	public String getName() {

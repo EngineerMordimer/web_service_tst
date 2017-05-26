@@ -1,7 +1,13 @@
 package s12103.pjatk.pl.web_service_tst;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by maciej.chmielinski on 13.05.2017.
@@ -30,6 +36,19 @@ public class Lesson implements Serializable {
 		this.classroom = classroom;
 		this.type = type;
 		this.id = id;
+	}
+
+	public Lesson(JSONObject jsonObject) throws JSONException, ParseException {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+
+		this.building = jsonObject.getString("Budynek");
+		this.beginDate = dateFormat.parse(jsonObject.getString("Data_roz"));
+		this.endDate = dateFormat.parse(jsonObject.getString("Data_zak"));
+		this.code = jsonObject.getString("Kod");
+		this.name = jsonObject.getString("Nazwa");
+		this.classroom = jsonObject.getString("Nazwa_sali");
+		this.type = jsonObject.getString("TypZajec");
+		this.id = jsonObject.getInt("idRealizacja_zajec");
 	}
 
 	public String getBuilding() {
@@ -63,6 +82,21 @@ public class Lesson implements Serializable {
 	public long getId() {
 		return id;
 	}
+
+	public Date getDate() throws ParseException {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		return dateFormat.parse(dateFormat.format(this.beginDate));
+	}
+
+//	public Date getBeginTime() throws ParseException {
+//		DateFormat dateFormat = new SimpleDateFormat("hh:mm");
+//		return dateFormat.parse(dateFormat.format(this.beginDate));
+//	}
+//
+//	public Date getEndTime() throws ParseException {
+//		DateFormat dateFormat = new SimpleDateFormat("hh:mm");
+//		return dateFormat.parse(dateFormat.format(this.endDate));
+//	}
 
 	@Override
 	public String toString() {

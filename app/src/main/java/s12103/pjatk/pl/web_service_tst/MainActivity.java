@@ -2,7 +2,7 @@ package s12103.pjatk.pl.web_service_tst;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -13,10 +13,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.ksoap2.SoapEnvelope;
-import org.ksoap2.SoapFault;
-import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,11 +27,13 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-	String TAG = "Response";
 	TextView textView;
-	Button bt_connect, bt_test;
+	Button bt_student_data, bt_test, bt_show;
+
 	String username = "";
 	String password = "";
+
+	Person person;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +41,12 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		textView = (TextView) findViewById(R.id.textView);
-		bt_connect = (Button) findViewById(R.id.bt_connect);
+		bt_student_data = (Button) findViewById(R.id.bt_student_data);
 		bt_test = (Button) findViewById(R.id.bt_test);
+		bt_show = (Button) findViewById(R.id.bt_show);
 
-		textView.setText("JIO");
-		bt_connect.setOnClickListener(new View.OnClickListener() {
+		textView.setText("START");
+		bt_student_data.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				AsyncCallLoadData task = new AsyncCallLoadData();
@@ -59,34 +61,37 @@ public class MainActivity extends AppCompatActivity {
 				task.execute();
 			}
 		});
+
+		bt_show.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				textView.setText(person.toString());
+			}
+		});
+	}
+
+	public void test_connect() throws Exception {
+		HttpResponse response = getStudentSchedule(username, password, "2017-05-26", "2017-05-29");
+		JSONArray jsonArray = new JSONArray(EntityUtils.toString(response.getEntity()));
+		ArrayList<Lesson> lessonList = getScheduleFromJson(jsonArray);
+		Log.i("TEST", "Status Code: " + response.getStatusLine().getStatusCode());
 	}
 
 	private class AsyncCallLoadData extends AsyncTask<Void, Void, Void> {
 
 		@Override
-		protected void onPreExecute() {
-			Log.i(TAG, "onPreExecute");
-		}
-
-		@Override
 		protected Void doInBackground(Void... params) {
-			Log.i(TAG, "doInBackground");
+			Log.i("LOAD_DATA", "doInBackground");
 			try {
-				testParser();
-			} catch (SoapFault soapFault) {
-				soapFault.printStackTrace();
+				HttpResponse response = getStudentPersonalDataSimple(username, password);
+				JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+
 			return null;
 		}
 
-		@Override
-		protected void onPostExecute(Void result) {
-			Log.i(TAG, "onPostExecute");
-			// textView.setText(resultString.toString());
-			// Toast.makeText(MainActivity.this, "Response" + resultString.toString(),
-			// Toast.LENGTH_LONG).show();
-
-		}
 	}
 
 	private class AsyncCallTest extends AsyncTask<Void, Void, Void> {
@@ -94,8 +99,8 @@ public class MainActivity extends AppCompatActivity {
 		@Override
 		protected Void doInBackground(Void... voids) {
 			try {
-				connect();
-			} catch (IOException exception) {
+				test_connect();
+			} catch (Exception exception) {
 				exception.printStackTrace();
 			}
 			return null;
@@ -114,58 +119,33 @@ public class MainActivity extends AppCompatActivity {
 		return response;
 	}
 
-	public HttpResponse getStudentFaculty(String username, String password) throws IOException {
-		String URL = "https://ws.pjwstk.edu.pl/test/Service.svc/XMLService/GetStudentFaculty";
+	public HttpResponse getStudentPersonalDataSimple(String username, String password)
+			throws IOException {
+		String URL = "https://ws.pjwstk.edu.pl/test/Service.svc/XMLService/GetStudentPersonalDataSimpleJson";
 		return getResponseFromUrl(URL, username, password);
 	}
 
-	public void connect() throws IOException {
-		HttpResponse response = getStudentFaculty(username, password);
-		Log.i(TAG, "Status Code: " + response.getStatusLine().getStatusCode());
-		Log.i(TAG, "Content: " + EntityUtils.toString(response.getEntity()));
+	public HttpResponse getStudentSchedule(String username, String password, String beginDate,
+			String endDate) throws IOException {
+		String baseURL = "https://ws.pjwstk.edu.pl/test/Service.svc/XMLService/GetStudentScheduleJson?";
+		String URL = baseURL + "begin=" + beginDate + "&end=" + endDate;
+		return getResponseFromUrl(URL, username, password);
 	}
 
-	public void testParser() throws SoapFault {
-		String tmpMessage = "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
-				+ "    <s:Body>\n"
-				+ "        <GetStudentScheduleJsonResponse xmlns=\"http://tempuri.org/\">\n"
-				+ "            <GetStudentScheduleJsonResult xmlns:a=\"http://schemas.datacontract.org/2004/07/WServices\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\">\n"
-				+ "                <a:Zajecia>\n" + "                    <a:Budynek>A</a:Budynek>\n"
-				+ "                    <a:Data_roz>2017-05-13 08:30</a:Data_roz>\n"
-				+ "                    <a:Data_zak>2017-05-13 10:00</a:Data_zak>\n"
-				+ "                    <a:Kod>ICK</a:Kod>\n"
-				+ "                    <a:Nazwa>Interakcja człowiek-komputer</a:Nazwa>\n"
-				+ "                    <a:Nazwa_sali>118</a:Nazwa_sali>\n"
-				+ "                    <a:TypZajec>Ćwiczenia</a:TypZajec>\n"
-				+ "                    <a:idRealizacja_zajec>86190268</a:idRealizacja_zajec>\n"
-				+ "                </a:Zajecia>\n" + "                <a:Zajecia>\n"
-				+ "                    <a:Budynek>A</a:Budynek>\n"
-				+ "                    <a:Data_roz>2017-05-14 17:45</a:Data_roz>\n"
-				+ "                    <a:Data_zak>2017-05-14 19:15</a:Data_zak>\n"
-				+ "                    <a:Kod>PRO2h</a:Kod>\n"
-				+ "                    <a:Nazwa>Projekt 2 - Sieci urządzeń mobilnych</a:Nazwa>\n"
-				+ "                    <a:Nazwa_sali>133</a:Nazwa_sali>\n"
-				+ "                    <a:TypZajec>Ćwiczenia</a:TypZajec>\n"
-				+ "                    <a:idRealizacja_zajec>86193726</a:idRealizacja_zajec>\n"
-				+ "                </a:Zajecia>\n" + "            </GetStudentScheduleJsonResult>\n"
-				+ "        </GetStudentScheduleJsonResponse>\n" + "    </s:Body>\n"
-				+ "</s:Envelope>";
+	public Person getPersonFromJson(JSONObject jsonObject) throws JSONException {
+		return new Person(jsonObject);
+	}
 
-		SoapSerializationEnvelope env = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-		env.dotNet = true;
-
-		// Set your string as output
-		env.setOutputSoapObject(tmpMessage);
-
-		// Get response
-		SoapObject so = (SoapObject) env.getResponse();
-		SoapParser soapParser = new SoapParser();
-		try {
-			Vector<Lesson> lessonVector = soapParser.readScheduleSoapResponse(so);
-			textView.setText(lessonVector.toString());
-			Log.e("TESTOWANie", lessonVector.toString());
-		} catch (ParseException e) {
-			e.printStackTrace();
+	public ArrayList<Lesson> getScheduleFromJson(JSONArray jsonArray)
+			throws JSONException, ParseException {
+		ArrayList<Lesson> lessonList = new ArrayList<>();
+		for (int i = 0; i < jsonArray.length(); i++) {
+			JSONObject lessonJSON = jsonArray.getJSONObject(i);
+			Log.i("ARRAY", lessonJSON.toString());
+			Lesson lesson = new Lesson(lessonJSON);
+			lessonList.add(lesson);
 		}
+		return lessonList;
 	}
+
 }

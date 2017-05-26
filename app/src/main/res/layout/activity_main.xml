@@ -20,11 +20,15 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content" android:id="@+id/bt_test"/>
 		<Button
-				android:text="Connect"
+				android:text="Get Student Data"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content" android:layout_below="@+id/textView"
 				android:layout_alignEnd="@+id/textView" android:layout_marginTop="68dp"
-				android:id="@+id/bt_connect"/>
+				android:id="@+id/bt_student_data"/>
+		<Button
+				android:text="show student"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content" android:id="@+id/bt_show"/>
 		<TextView
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
