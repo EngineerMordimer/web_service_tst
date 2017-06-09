@@ -103,14 +103,15 @@ public class MainActivity extends AppCompatActivity {
 		HttpResponse response;
 		username = "";
 		password = "";
-		response = getStudentSchedule(username, password, "2017-04-26", "2017-06-29");
+		response = ConnectionService.getStudentSchedule(username, password, "2017-04-26",
+				"2017-06-29");
 		JSONArray jsonArray = new JSONArray(EntityUtils.toString(response.getEntity()));
-		lessonList = getScheduleFromJson(jsonArray);
+		lessonList = ConnectionService.getScheduleFromJson(jsonArray);
 		Log.i("TEST", "Status Code Schedule: " + response.getStatusLine().getStatusCode());
 
-		response = getStudentPersonalDataSimple(username, password);
+		response = ConnectionService.getStudentPersonalDataSimple(username, password);
 		JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
-		person = getPersonFromJson(jsonObject);
+		person = ConnectionService.getPersonFromJson(jsonObject);
 		Log.i("TEST", "Status Code Personal: " + response.getStatusLine().getStatusCode());
 	}
 
@@ -122,9 +123,10 @@ public class MainActivity extends AppCompatActivity {
 			try {
 
 
-				HttpResponse response = getStudentPersonalDataSimple(username, password);
+				HttpResponse response = ConnectionService.getStudentPersonalDataSimple(username,
+						password);
 				JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
-				person = getPersonFromJson(jsonObject);
+				person = ConnectionService.getPersonFromJson(jsonObject);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -146,44 +148,5 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
-	public HttpResponse getResponseFromUrl(String URL, String username, String password)
-			throws IOException {
-		CredentialsProvider provider = new BasicCredentialsProvider();
-		NTCredentials ntCredentials = new NTCredentials(username, password, "", "");
-		provider.setCredentials(AuthScope.ANY, ntCredentials);
-		HttpClient client = HttpClientBuilder.create()
-				.setDefaultCredentialsProvider(provider)
-				.build();
-		HttpResponse response = client.execute(new HttpGet(URL));
-		return response;
-	}
-
-	public HttpResponse getStudentPersonalDataSimple(String username, String password)
-			throws IOException {
-		String URL = "https://ws.pjwstk.edu.pl/test/Service.svc/XMLService/GetStudentPersonalDataSimpleJson";
-		return getResponseFromUrl(URL, username, password);
-	}
-
-	public HttpResponse getStudentSchedule(String username, String password, String beginDate,
-			String endDate) throws IOException {
-		String baseURL = "https://ws.pjwstk.edu.pl/test/Service.svc/XMLService/GetStudentScheduleJson?";
-		String URL = baseURL + "begin=" + beginDate + "&end=" + endDate;
-		return getResponseFromUrl(URL, username, password);
-	}
-
-	public Person getPersonFromJson(JSONObject jsonObject) throws JSONException {
-		return new Person(jsonObject);
-	}
-
-	public ArrayList<Lesson> getScheduleFromJson(JSONArray jsonArray)
-			throws JSONException, ParseException {
-		ArrayList<Lesson> lessonList = new ArrayList<>();
-		for (int i = 0; i < jsonArray.length(); i++) {
-			JSONObject lessonJSON = jsonArray.getJSONObject(i);
-			Lesson lesson = new Lesson(lessonJSON);
-			lessonList.add(lesson);
-		}
-		return lessonList;
-	}
 
 }
