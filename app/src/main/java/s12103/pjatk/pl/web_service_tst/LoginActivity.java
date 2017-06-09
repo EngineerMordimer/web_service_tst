@@ -6,6 +6,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -66,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 		// Check for a valid password, if the user entered one.
 		if (TextUtils.isEmpty(password)) {
-			mPasswordView.setError(getString(R.string.error_invalid_password));
+			mPasswordView.setError(getString(R.string.error_field_required));
 			focusView = mPasswordView;
 			cancel = true;
 		}
@@ -87,7 +88,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 			// perform the user login attempt.
 			showProgress(true);
 			mAuthTask = new UserLoginTask(username, password);
-			mAuthTask.execute((Void) null);
+			mAuthTask.execute();
 		}
 	}
 
@@ -110,8 +111,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 			}
 		});
 
-		Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-
+		Button mBtLogin = (Button) findViewById(R.id.bt_login);
+		mBtLogin.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				attemptLogin();
+			}
+		});
 
 		mLoginFormView = findViewById(R.id.login_form);
 		mProgressView = findViewById(R.id.login_progress);
@@ -185,9 +191,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		protected Boolean doInBackground(Void... params) {
 			try {
 				connectionStatus = ConnectionService.getTesterStatusCode(mUsername, mPassword);
-				personData = ConnectionService.getPersonData(mUsername, mPassword);
-				personSchedule = ConnectionService.getScheduleData(mUsername, mPassword,
-						scheduleBeginDate, scheduleEndDate);
+				if (connectionStatus != 200){
+					return false;
+				} else {
+					personData = ConnectionService.getPersonData(mUsername, mPassword);
+					personSchedule = ConnectionService.getScheduleData(mUsername, mPassword,
+							scheduleBeginDate, scheduleEndDate);
+				}
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -208,7 +218,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 			showProgress(false);
 
 			if (success) {
-				finish();
+				Intent intent = new Intent(LoginActivity.this, CalendarViewActivity.class);
+				intent.putExtra("PERSON", personData);
+				intent.putExtra("SCHEDULE", personSchedule);
+				startActivity(intent);
 			} else {
 				mPasswordView.setError(getString(R.string.error_incorrect_password));
 				mPasswordView.requestFocus();
