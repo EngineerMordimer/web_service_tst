@@ -26,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 	final Context context = this;
 	TextView textView;
 	Button bt_student_data, bt_test, bt_show, bt_go_calendar;
+	EditText tb_login, tb_password;
 
 	String username = "";
 	String password = "";
@@ -50,13 +52,21 @@ public class MainActivity extends AppCompatActivity {
 		bt_test = (Button) findViewById(R.id.bt_test);
 		bt_show = (Button) findViewById(R.id.bt_show);
 		bt_go_calendar = (Button) findViewById(R.id.bt_goCalendar);
+		tb_login = (EditText) findViewById(R.id.tb_login);
+		tb_password = (EditText) findViewById(R.id.tb_password);
 
 		textView.setText("START");
 		bt_student_data.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
+				username = tb_login.getText().toString();
+				password = tb_password.getText().toString();
 				AsyncCallLoadData task = new AsyncCallLoadData();
 				task.execute();
+				AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+				alertBuilder.setMessage("Data Loaded").setCancelable(true);
+				AlertDialog alertDialog = alertBuilder.create();
+				alertDialog.show();
 			}
 		});
 
@@ -91,16 +101,17 @@ public class MainActivity extends AppCompatActivity {
 
 	public void test_connect() throws Exception {
 		HttpResponse response;
-
-		response = getStudentSchedule(username, password, "2017-05-26", "2017-05-29");
+		username = "";
+		password = "";
+		response = getStudentSchedule(username, password, "2017-04-26", "2017-06-29");
 		JSONArray jsonArray = new JSONArray(EntityUtils.toString(response.getEntity()));
 		lessonList = getScheduleFromJson(jsonArray);
-		Log.i("TEST", "Status Code: " + response.getStatusLine().getStatusCode());
+		Log.i("TEST", "Status Code Schedule: " + response.getStatusLine().getStatusCode());
 
 		response = getStudentPersonalDataSimple(username, password);
 		JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
 		person = getPersonFromJson(jsonObject);
-		Log.i("TEST", "Status Code: " + response.getStatusLine().getStatusCode());
+		Log.i("TEST", "Status Code Personal: " + response.getStatusLine().getStatusCode());
 	}
 
 	private class AsyncCallLoadData extends AsyncTask<Void, Void, Void> {
@@ -109,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
 		protected Void doInBackground(Void... params) {
 			Log.i("LOAD_DATA", "doInBackground");
 			try {
+
+
 				HttpResponse response = getStudentPersonalDataSimple(username, password);
 				JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
 				person = getPersonFromJson(jsonObject);
